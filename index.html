@@ -149,8 +149,19 @@
         let currentDuration = 0;
         let isPlayerReady = false;
 
-        // ✅ YouTube API 표준 초기화 (간단하고 안정적)
+        // ✅ YouTube API 초기화 (새로고침 대응)
         function onYouTubeIframeAPIReady() {
+            initPlayer();
+        }
+
+        function initPlayer() {
+            // 기존 플레이어가 있으면 제거
+            if (player && player.destroy) {
+                try {
+                    player.destroy();
+                } catch (e) {}
+            }
+
             player = new YT.Player('player', {
                 height: '360',
                 width: '640',
@@ -170,11 +181,22 @@
             });
         }
 
+        // ✅ 페이지 로드 시 API 상태 확인
+        window.addEventListener('load', function() {
+            // YouTube API가 이미 로드되어 있는지 확인
+            if (typeof YT !== 'undefined' && YT && YT.Player) {
+                // API 준비 완료
+                if (!player || !isPlayerReady) {
+                    initPlayer();
+                }
+            }
+            // API가 없으면 onYouTubeIframeAPIReady 콜백 대기
+        });
+
         function onPlayerReady(event) {
             isPlayerReady = true;
             document.getElementById('nowPlaying').textContent = '✅ 플레이어 준비 완료!';
             initializePlaylist();
-            // 안정성을 위해 약간의 지연
             setTimeout(() => playRandomVideo(), 300);
         }
 
