@@ -97,7 +97,7 @@
         <div class="timer-section">
             <div class="timer-display">⏱️ 다음 곡까지</div>
             <div class="timer-number" id="timer">--</div>
-            <div class="now-playing" id="nowPlaying">재생 대기 중...</div>
+            <div class="now-playing" id="nowPlaying">🔄 플레이어 로딩 중...</div>
         </div>
 
         <div class="controls">
@@ -147,20 +147,41 @@
         let countdown = 0;
         let timerInterval;
         let currentDuration = 0;
+        let isPlayerReady = false;
 
+        // ✅ YouTube API 표준 초기화 (간단하고 안정적)
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 height: '360',
                 width: '640',
                 videoId: '',
-                playerVars: { 'autoplay': 1, 'controls': 1, 'rel': 0, 'modestbranding': 1 },
-                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+                playerVars: { 
+                    'autoplay': 1, 
+                    'controls': 1, 
+                    'rel': 0, 
+                    'modestbranding': 1,
+                    'playsinline': 1
+                },
+                events: { 
+                    'onReady': onPlayerReady, 
+                    'onStateChange': onPlayerStateChange,
+                    'onError': onPlayerError
+                }
             });
         }
 
-        function onPlayerReady() {
+        function onPlayerReady(event) {
+            isPlayerReady = true;
+            document.getElementById('nowPlaying').textContent = '✅ 플레이어 준비 완료!';
             initializePlaylist();
-            playRandomVideo();
+            // 안정성을 위해 약간의 지연
+            setTimeout(() => playRandomVideo(), 300);
+        }
+
+        function onPlayerError(event) {
+            console.error('플레이어 오류:', event.data);
+            document.getElementById('nowPlaying').textContent = '⚠️ 영상 로드 오류 - 재시도 중...';
+            setTimeout(() => playRandomVideo(), 3000);
         }
 
         function onPlayerStateChange(event) {
@@ -184,32 +205,49 @@
         }
 
         function playVideo(index) {
+            if (!isPlayerReady || !player || !player.loadVideoById) {
+                console.log('플레이어 준비 중...');
+                setTimeout(() => playVideo(index), 500);
+                return;
+            }
+
             currentVideoIndex = index;
             const video = videos[index];
             currentDuration = getRandomDuration();
             
-            // ✅ endSeconds를 사용하여 정확한 시간에 영상 종료
-            player.loadVideoById({
-                'videoId': video.id,
-                'startSeconds': 0,
-                'endSeconds': currentDuration
-            });
-            
-            document.getElementById('nowPlaying').textContent = `🎵 ${video.title}`;
-            highlightPlayingCard(index);
-            startTimer(currentDuration);
+            try {
+                // ✅ endSeconds를 사용하여 정확한 시간에 영상 종료
+                player.loadVideoById({
+                    'videoId': video.id,
+                    'startSeconds': 0,
+                    'endSeconds': currentDuration
+                });
+                
+                document.getElementById('nowPlaying').textContent = `🎵 ${video.title}`;
+                highlightPlayingCard(index);
+                startTimer(currentDuration);
+            } catch (error) {
+                console.error('영상 재생 오류:', error);
+                setTimeout(() => playRandomVideo(), 2000);
+            }
         }
 
         function startTimer(duration) {
+            // ✅ 기존 타이머 완전히 정리
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
             countdown = duration;
             updateTimerDisplay();
-            if (timerInterval) clearInterval(timerInterval);
 
             timerInterval = setInterval(() => {
                 countdown--;
                 updateTimerDisplay();
                 if (countdown <= 0) {
                     clearInterval(timerInterval);
+                    timerInterval = null;
                     playRandomVideo();
                 }
             }, 1000);
@@ -250,26 +288,47 @@
         }
 
         function playNextRandom() {
-            clearInterval(timerInterval);
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
             playRandomVideo();
         }
 
         window.onbeforeunload = function() {
-            if (timerInterval) clearInterval(timerInterval);
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
         };
 
         // 🔒 개발자 도구 감지
         let devtoolsOpen = false;
+        let reloadCount = parseInt(sessionStorage.getItem('reloadCount') || '0');
+        
+        // 무한 새로고침 방지
+        if (reloadCount > 3) {
+            console.log('과도한 새로고침 감지');
+            sessionStorage.setItem('reloadCount', '0');
+        }
+
         setInterval(() => {
             const threshold = 160;
             if (window.outerWidth - window.innerWidth > threshold || 
                 window.outerHeight - window.innerHeight > threshold) {
-                if (!devtoolsOpen) {
+                if (!devtoolsOpen && reloadCount < 3) {
                     devtoolsOpen = true;
+                    reloadCount++;
+                    sessionStorage.setItem('reloadCount', reloadCount.toString());
                     location.reload();
                 }
             } else {
                 devtoolsOpen = false;
+                if (reloadCount > 0) {
+                    setTimeout(() => {
+                        sessionStorage.setItem('reloadCount', '0');
+                    }, 5000);
+                }
             }
         }, 500);
     </script>
