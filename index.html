@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -6,79 +7,436 @@
     <title>랜덤이 만든 레전드플레이 | 민호특공대</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary-mint: #00D4AA;
+            --secondary-mint: #20E3B2;
+            --dark-mint: #00B894;
+            --accent-gray: #636e72;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow-primary: 0 8px 32px rgba(0, 212, 170, 0.15);
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --gradient-main: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+            --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard", Arial, sans-serif;
-            background: linear-gradient(135deg, #00CEC9 0%, #74B9FF 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "SF Pro Display", "Pretendard", Arial, sans-serif;
+            background: var(--gradient-main);
             min-height: 100vh;
             padding: 20px;
             user-select: none;
             -webkit-user-select: none;
             -moz-user-select: none;
+            position: relative;
+            overflow-x: hidden;
         }
+
+        /* 배경 애니메이션 효과 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 212, 170, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(32, 227, 178, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 184, 148, 0.04) 0%, transparent 50%);
+            animation: backgroundPulse 12s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes backgroundPulse {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
         .container {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 206, 201, 0.3);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            box-shadow: var(--shadow-primary);
             overflow: hidden;
-            max-width: 900px;
+            max-width: 950px;
             margin: 0 auto;
+            position: relative;
         }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, var(--primary-mint) 50%, transparent 100%);
+        }
+
         .header {
-            background: linear-gradient(135deg, #00CEC9 0%, #00B8B2 100%);
-            color: white;
-            padding: 40px 30px;
+            background: var(--gradient-glass);
+            backdrop-filter: blur(10px);
+            color: #2d3436;
+            padding: 50px 30px;
             text-align: center;
             position: relative;
             overflow: hidden;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
+
         .header::before {
             content: '⚡';
             position: absolute;
-            font-size: 150px;
-            opacity: 0.1;
-            top: -30px;
-            right: -20px;
+            font-size: 200px;
+            opacity: 0.05;
+            top: -50px;
+            right: -30px;
+            animation: floatSpark 6s ease-in-out infinite;
         }
-        .header h1 { font-size: 32px; margin-bottom: 8px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-        .header .album { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-        .header .subtitle { font-size: 16px; opacity: 0.95; font-weight: 500; margin-bottom: 5px; }
-        .header .team-name { font-size: 14px; opacity: 0.9; }
 
-        .video-wrapper { position: relative; padding-bottom: 56.25%; background: #000; height: 0; }
-        #player { position: absolute; top:0; left:0; width:100%; height:100%; border:none; }
+        @keyframes floatSpark {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
 
-        .timer-section { padding: 25px 30px; background: linear-gradient(to bottom, white 0%, #f8fcfc 100%); text-align: center; border-bottom: 2px solid #e8f8f8; }
-        .timer-display { font-size: 18px; color: #2d3436; font-weight: 600; margin-bottom: 8px; }
-        .timer-number { font-size: 36px; color: #00CEC9; font-weight: 800; margin-bottom: 8px; }
-        .now-playing { font-size: 14px; color: #636e72; margin-top: 5px; font-weight: 500; }
+        .header h1 { 
+            font-size: 38px; 
+            margin-bottom: 12px; 
+            font-weight: 900; 
+            text-shadow: 0 4px 20px rgba(0, 212, 170, 0.3);
+            letter-spacing: -1px;
+            background: linear-gradient(45deg, #00D4AA, #2d3436, #20E3B2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
 
-        .controls { padding: 30px; text-align: center; background: linear-gradient(to bottom, white 0%, #f8fcfc 100%); }
+        @keyframes titleGlow {
+            0% { filter: drop-shadow(0 0 10px rgba(0, 212, 170, 0.2)); }
+            100% { filter: drop-shadow(0 0 20px rgba(0, 212, 170, 0.4)); }
+        }
+
+        .header .album { 
+            font-size: 22px; 
+            font-weight: 700; 
+            margin-bottom: 12px; 
+            opacity: 0.8;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header .subtitle { 
+            font-size: 18px; 
+            opacity: 0.7; 
+            font-weight: 600; 
+            margin-bottom: 8px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header .team-name { 
+            font-size: 16px; 
+            opacity: 0.6; 
+            font-weight: 500;
+        }
+
+        /* 시간대 표시 영역 */
+        .time-status {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px 25px;
+            text-align: center;
+            color: #2d3436;
+            font-size: 14px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .time-status .time-label {
+            color: var(--primary-mint);
+            font-size: 16px;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(0, 212, 170, 0.2);
+            margin-right: 10px;
+        }
+
+        .time-status .duration-info {
+            color: rgba(45, 52, 54, 0.7);
+            font-size: 13px;
+            margin-left: 10px;
+        }
+
+        .video-wrapper { 
+            position: relative; 
+            padding-bottom: 56.25%; 
+            background: #000; 
+            height: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #player { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            border: none; 
+        }
+
+        .timer-section { 
+            padding: 35px 30px; 
+            background: var(--gradient-glass);
+            backdrop-filter: blur(15px);
+            text-align: center; 
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            color: #2d3436;
+        }
+
+        .timer-display { 
+            font-size: 20px; 
+            font-weight: 600; 
+            margin-bottom: 15px;
+            opacity: 0.8;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .timer-number { 
+            font-size: 48px; 
+            font-weight: 900; 
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, var(--primary-mint), #2d3436, var(--secondary-mint));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 212, 170, 0.3);
+            letter-spacing: 2px;
+            animation: timerPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .now-playing { 
+            font-size: 16px; 
+            margin-top: 10px; 
+            font-weight: 500;
+            opacity: 0.7;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls { 
+            padding: 40px; 
+            text-align: center; 
+            background: var(--gradient-glass);
+            backdrop-filter: blur(15px);
+        }
+
         .btn {
-            background: linear-gradient(135deg, #00CEC9 0%, #00B8B2 100%);
-            color: white; border: none; padding: 16px 45px;
-            font-size: 17px; border-radius: 50px; cursor: pointer;
-            font-weight: 700; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,206,201,0.3);
+            background: linear-gradient(135deg, var(--primary-mint) 0%, var(--secondary-mint) 100%);
+            color: white; 
+            border: none; 
+            padding: 20px 55px;
+            font-size: 18px; 
+            border-radius: 60px; 
+            cursor: pointer;
+            font-weight: 700; 
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 
+                0 8px 25px rgba(0, 212, 170, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,206,201,0.4); }
 
-        .playlist-section { padding: 35px 30px; background: #F0FFFE; border-top: 3px solid #00CEC9; }
-        .playlist-section h3 { font-size: 20px; color: #2d3436; margin-bottom: 25px; text-align: center; font-weight: 700; }
-        .playlist-section h3 .count { color: #00CEC9; font-weight: 800; font-size: 22px; }
-        .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap: 20px; }
-        .video-card {
-            background: white; border-radius: 16px; overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,206,201,0.15); transition: all 0.3s ease;
-            cursor: pointer; border: 2px solid transparent;
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
         }
-        .video-card:hover { transform: translateY(-8px); box-shadow: 0 12px 24px rgba(0,206,201,0.25); border-color: #00CEC9; }
-        .video-card.playing { border-color: #FF6B6B; box-shadow: 0 0 0 4px rgba(255,107,107,0.2); }
-        .video-thumbnail { position: relative; padding-bottom: 56.25%; background: #000; overflow: hidden; }
-        .video-thumbnail img { position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; transition: transform 0.3s ease; }
-        .video-card:hover .video-thumbnail img { transform: scale(1.05); }
-        .video-info { padding: 14px; }
-        .video-title { font-size: 14px; font-weight: 600; color: #2d3436; line-height: 1.5; min-height: 42px; }
-        .footer { padding: 20px; text-align: center; background: white; color: #636e72; font-size: 13px; border-top: 1px solid #e9f5f5; }
-        @media (max-width:600px){.video-grid{grid-template-columns:1fr;}.header h1{font-size:26px;}}
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover { 
+            transform: translateY(-5px) scale(1.05); 
+            box-shadow: 
+                0 15px 35px rgba(0, 212, 170, 0.25),
+                0 0 0 1px rgba(255, 255, 255, 0.2),
+                0 0 40px rgba(0, 212, 170, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .playlist-section { 
+            padding: 45px 30px; 
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .playlist-section h3 { 
+            font-size: 24px; 
+            color: #2d3436; 
+            margin-bottom: 35px; 
+            text-align: center; 
+            font-weight: 800;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .playlist-section h3 .count { 
+            color: var(--primary-mint); 
+            font-weight: 900; 
+            font-size: 28px;
+            text-shadow: 0 0 15px rgba(0, 212, 170, 0.2);
+        }
+
+        .video-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
+            gap: 25px; 
+        }
+
+        .video-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            border-radius: 20px; 
+            overflow: hidden;
+            box-shadow: var(--shadow-card);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            cursor: pointer; 
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        .video-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(0, 212, 170, 0.08) 0%, rgba(32, 227, 178, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
+        }
+
+        .video-card:hover::before {
+            opacity: 1;
+        }
+
+        .video-card:hover { 
+            transform: translateY(-12px) scale(1.02); 
+            box-shadow: 
+                0 20px 40px rgba(0, 212, 170, 0.15),
+                0 0 0 1px rgba(0, 212, 170, 0.2),
+                0 0 60px rgba(32, 227, 178, 0.1);
+            border-color: var(--primary-mint);
+        }
+
+        .video-card.playing { 
+            border-color: #FF6B6B; 
+            box-shadow: 
+                0 0 0 3px rgba(255, 107, 107, 0.3),
+                0 15px 35px rgba(255, 107, 107, 0.2);
+            transform: scale(1.05);
+        }
+
+        .video-card.playing::before {
+            background: linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(255, 107, 107, 0.05) 100%);
+            opacity: 1;
+        }
+
+        .video-thumbnail { 
+            position: relative; 
+            padding-bottom: 56.25%; 
+            background: #000; 
+            overflow: hidden; 
+        }
+
+        .video-thumbnail img { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transition: transform 0.4s ease;
+            filter: brightness(0.9);
+        }
+
+        .video-card:hover .video-thumbnail img { 
+            transform: scale(1.1); 
+            filter: brightness(1.1);
+        }
+
+        .video-info { 
+            padding: 20px; 
+            position: relative;
+            z-index: 2;
+        }
+
+        .video-title { 
+            font-size: 15px; 
+            font-weight: 600; 
+            color: #2d3436; 
+            line-height: 1.5; 
+            min-height: 45px;
+            text-shadow: none;
+            transition: color 0.3s ease;
+        }
+
+        .video-card:hover .video-title {
+            color: var(--primary-mint);
+        }
+
+        .footer { 
+            padding: 30px; 
+            text-align: center; 
+            background: rgba(255, 255, 255, 0.9);
+            color: rgba(45, 52, 54, 0.7); 
+            font-size: 14px; 
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .footer small {
+            display: block;
+            margin-top: 8px;
+            opacity: 0.6;
+            font-size: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .video-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+            .header h1 { font-size: 28px; }
+            .header { padding: 40px 20px; }
+            .timer-number { font-size: 36px; }
+            .btn { padding: 16px 40px; font-size: 16px; }
+            .container { margin: 10px; border-radius: 24px; }
+        }
+
+        @media (max-width: 480px) {
+            .video-grid { grid-template-columns: 1fr; }
+            .header h1 { font-size: 24px; }
+            .timer-number { font-size: 28px; }
+        }
     </style>
 </head>
 <body>
@@ -89,34 +447,35 @@
             <div class="subtitle">⚡ 조회수는 우연이 아닙니다! ⚡</div>
             <div class="team-name"> 👀콘서트 전까지 달려 봅시다^^ </div>
         </div>
-
+        
+      
+        
         <div class="video-wrapper">
             <div id="player"></div>
         </div>
-
+        
         <div class="timer-section">
             <div class="timer-display">⏱️ 다음 곡까지</div>
-            <div class="timer-number" id="timer">--</div>
-            <div class="now-playing" id="nowPlaying">🔄 플레이어 로딩 중...</div>
+            <div class="timer-number" id="timer">--:--</div>
+            <div class="now-playing" id="nowPlaying">🎵 준비 중...</div>
         </div>
-
+        
         <div class="controls">
             <button class="btn" onclick="playNextRandom()">🔄 다음 곡 재생</button>
         </div>
-
+        
         <div class="playlist-section">
             <h3>📋 전곡 재생목록 <span class="count" id="videoCount">0</span>개</h3>
             <div class="video-grid" id="videoGrid"></div>
         </div>
-
+        
         <div class="footer">
-            Made with ❤️ by 민호특공대<br>
-            <small style="opacity: 0.7;">🎁🎁🎁🎁🎁</small>
+            Made with  by 민호특공대<br>
+            <small>🎁🎁🎁🎁🎁</small>
         </div>
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
-
     <script>
         // 🔒 보안 강화
         document.addEventListener('contextmenu', e => { e.preventDefault(); return false; });
@@ -149,19 +508,64 @@
         let currentDuration = 0;
         let isPlayerReady = false;
 
-        // ✅ YouTube API 초기화 (새로고침 대응)
+        // 시간대별 재생시간 설정
+        function getTimeSlotInfo() {
+            const now = new Date();
+            const hour = now.getHours();
+            const minutes = now.getMinutes();
+            const timeString = `${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            
+            let timeSlot, icon, durationRange, minDuration, maxDuration;
+            
+            if (hour >= 5 && hour < 11) {
+                // 아침 (05:00~10:59): 75~105초
+                timeSlot = '🌅 아침 타임';
+                durationRange = '재생시간: 75~105초';
+                minDuration = 75;
+                maxDuration = 105;
+            } else if (hour >= 11 && hour < 17) {
+                // 점심 (11:00~16:59): 95~125초
+                timeSlot = '☀️ 점심 타임';
+                durationRange = '재생시간: 95~125초';
+                minDuration = 95;
+                maxDuration = 125;
+            } else {
+                // 밤 (17:00~04:59): 130~160초
+                timeSlot = '🌙 밤 타임';
+                durationRange = '재생시간: 130~160초';
+                minDuration = 130;
+                maxDuration = 160;
+            }
+            
+            return { timeSlot, durationRange, minDuration, maxDuration, timeString };
+        }
+
+        // 현재 시간대에 맞는 랜덤 재생시간 생성
+        function getRandomDuration() {
+            const { minDuration, maxDuration } = getTimeSlotInfo();
+            return Math.floor(Math.random() * (maxDuration - minDuration + 1)) + minDuration;
+        }
+
+        // 시간대 정보 업데이트
+        function updateTimeSlotDisplay() {
+            const { timeSlot, durationRange, timeString } = getTimeSlotInfo();
+            document.getElementById('currentTimeSlot').textContent = timeSlot;
+            document.getElementById('currentTime').textContent = timeString;
+            document.getElementById('durationRange').textContent = durationRange;
+        }
+
+        // YouTube API 초기화
         function onYouTubeIframeAPIReady() {
             initPlayer();
         }
 
         function initPlayer() {
-            // 기존 플레이어가 있으면 제거
             if (player && player.destroy) {
                 try {
                     player.destroy();
                 } catch (e) {}
             }
-
+            
             player = new YT.Player('player', {
                 height: '360',
                 width: '640',
@@ -181,23 +585,20 @@
             });
         }
 
-        // ✅ 페이지 로드 시 API 상태 확인
         window.addEventListener('load', function() {
-            // YouTube API가 이미 로드되어 있는지 확인
             if (typeof YT !== 'undefined' && YT && YT.Player) {
-                // API 준비 완료
                 if (!player || !isPlayerReady) {
                     initPlayer();
                 }
             }
-            // API가 없으면 onYouTubeIframeAPIReady 콜백 대기
+            updateTimeSlotDisplay();
+            setInterval(updateTimeSlotDisplay, 60000); // 1분마다 시간 업데이트
         });
 
         function onPlayerReady(event) {
             isPlayerReady = true;
-            document.getElementById('nowPlaying').textContent = '✅ 플레이어 준비 완료!';
             initializePlaylist();
-            setTimeout(() => playRandomVideo(), 300);
+            setTimeout(() => playRandomVideo(), 100);
         }
 
         function onPlayerError(event) {
@@ -207,15 +608,10 @@
         }
 
         function onPlayerStateChange(event) {
-            // 영상이 재생 중일 때만 타이머 작동
-            if (event.data === YT.PlayerState.PLAYING && countdown > 0) {
-                // 자동 다음 곡 재생
+            // 영상 끝나면 자동으로 다음 곡 재생
+            if (event.data === YT.PlayerState.ENDED) {
+                setTimeout(() => playRandomVideo(), 500);
             }
-        }
-
-        function getRandomDuration() {
-            // ✅ 82~122초 (40초 범위) - 광고 포함 + 자연스러운 패턴
-            return Math.floor(Math.random() * (122 - 82 + 1)) + 82;
         }
 
         function playRandomVideo() {
@@ -238,7 +634,7 @@
             currentDuration = getRandomDuration();
             
             try {
-                // ✅ endSeconds를 사용하여 정확한 시간에 영상 종료
+                // endSeconds를 사용하여 정확한 시간에 영상 종료
                 player.loadVideoById({
                     'videoId': video.id,
                     'startSeconds': 0,
@@ -248,6 +644,7 @@
                 document.getElementById('nowPlaying').textContent = `🎵 ${video.title}`;
                 highlightPlayingCard(index);
                 startTimer(currentDuration);
+                updateTimeSlotDisplay();
             } catch (error) {
                 console.error('영상 재생 오류:', error);
                 setTimeout(() => playRandomVideo(), 2000);
@@ -255,7 +652,6 @@
         }
 
         function startTimer(duration) {
-            // ✅ 기존 타이머 완전히 정리
             if (timerInterval) {
                 clearInterval(timerInterval);
                 timerInterval = null;
@@ -263,13 +659,13 @@
             
             countdown = duration;
             updateTimerDisplay();
-
             timerInterval = setInterval(() => {
                 countdown--;
                 updateTimerDisplay();
                 if (countdown <= 0) {
                     clearInterval(timerInterval);
                     timerInterval = null;
+                    // 타이머 끝나면 바로 다음 곡 재생
                     playRandomVideo();
                 }
             }, 1000);
@@ -302,9 +698,14 @@
                     <div class="video-thumbnail">
                         <img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${v.title}">
                     </div>
-                    <div class="video-info"><div class="video-title">${v.title}</div></div>
+                    <div class="video-info">
+                        <div class="video-title">${v.title}</div>
+                    </div>
                 `;
-                card.onclick = () => { playVideo(i); window.scrollTo({top:0,behavior:'smooth'}); };
+                card.onclick = () => { 
+                    playVideo(i); 
+                    window.scrollTo({top: 0, behavior: 'smooth'}); 
+                };
                 grid.appendChild(card);
             });
         }
@@ -328,7 +729,6 @@
         let devtoolsOpen = false;
         let reloadCount = parseInt(sessionStorage.getItem('reloadCount') || '0');
         
-        // 무한 새로고침 방지
         if (reloadCount > 3) {
             console.log('과도한 새로고침 감지');
             sessionStorage.setItem('reloadCount', '0');
