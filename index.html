@@ -11,6 +11,9 @@
             background: linear-gradient(135deg, #00CEC9 0%, #74B9FF 100%);
             min-height: 100vh;
             padding: 20px;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
         }
         .container {
             background: white;
@@ -35,9 +38,7 @@
             opacity: 0.1;
             top: -30px;
             right: -20px;
-            animation: float 3s ease-in-out infinite;
         }
-        @keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-20px);} }
         .header h1 { font-size: 32px; margin-bottom: 8px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
         .header .album { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
         .header .subtitle { font-size: 16px; opacity: 0.95; font-weight: 500; margin-bottom: 5px; }
@@ -109,15 +110,29 @@
         </div>
 
         <div class="footer">
-            Made with  by 민호특공대<br>
+            Made with ❤️ by 민호특공대<br>
             <small style="opacity: 0.7;">🎁🎁🎁🎁🎁</small>
         </div>
     </div>
 
-    <!-- ✅ YouTube IFrame API 불러오기 -->
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
+        // 🔒 보안 강화
+        document.addEventListener('contextmenu', e => { e.preventDefault(); return false; });
+        document.addEventListener('selectstart', e => { e.preventDefault(); return false; });
+        document.addEventListener('dragstart', e => { e.preventDefault(); return false; });
+        document.addEventListener('copy', e => { e.preventDefault(); return false; });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || e.keyCode === 123 ||
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+                (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+
         const videos = [
             { id: 'ZJo6KHpI-2k', title: '한계령 (Hankyeryeong Pass) Official MV' },
             { id: 'BRiBNS0aTVo', title: '내 곁에 있어주 | 야외녹음실 ｜LIVE' },
@@ -131,15 +146,15 @@
         let currentVideoIndex = -1;
         let countdown = 0;
         let timerInterval;
+        let currentDuration = 0;
 
-        // YouTube API 준비 시
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
                 height: '360',
                 width: '640',
                 videoId: '',
-                playerVars: { 'autoplay': 1, 'controls': 1, 'rel': 0 },
-                events: { 'onReady': onPlayerReady }
+                playerVars: { 'autoplay': 1, 'controls': 1, 'rel': 0, 'modestbranding': 1 },
+                events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
             });
         }
 
@@ -148,8 +163,16 @@
             playRandomVideo();
         }
 
+        function onPlayerStateChange(event) {
+            // 영상이 재생 중일 때만 타이머 작동
+            if (event.data === YT.PlayerState.PLAYING && countdown > 0) {
+                // 자동 다음 곡 재생
+            }
+        }
+
         function getRandomDuration() {
-            return Math.floor(Math.random() * (105 - 95 + 1)) + 95; // 95~105초
+            // ✅ 82~122초 (40초 범위) - 광고 포함 + 자연스러운 패턴
+            return Math.floor(Math.random() * (122 - 82 + 1)) + 82;
         }
 
         function playRandomVideo() {
@@ -163,12 +186,18 @@
         function playVideo(index) {
             currentVideoIndex = index;
             const video = videos[index];
-            player.loadVideoById(video.id);
+            currentDuration = getRandomDuration();
+            
+            // ✅ endSeconds를 사용하여 정확한 시간에 영상 종료
+            player.loadVideoById({
+                'videoId': video.id,
+                'startSeconds': 0,
+                'endSeconds': currentDuration
+            });
+            
             document.getElementById('nowPlaying').textContent = `🎵 ${video.title}`;
             highlightPlayingCard(index);
-
-            const duration = getRandomDuration();
-            startTimer(duration);
+            startTimer(currentDuration);
         }
 
         function startTimer(duration) {
@@ -187,7 +216,10 @@
         }
 
         function updateTimerDisplay() {
-            document.getElementById('timer').textContent = `${countdown}초`;
+            const minutes = Math.floor(countdown / 60);
+            const seconds = countdown % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
         }
 
         function highlightPlayingCard(index) {
@@ -225,7 +257,21 @@
         window.onbeforeunload = function() {
             if (timerInterval) clearInterval(timerInterval);
         };
+
+        // 🔒 개발자 도구 감지
+        let devtoolsOpen = false;
+        setInterval(() => {
+            const threshold = 160;
+            if (window.outerWidth - window.innerWidth > threshold || 
+                window.outerHeight - window.innerHeight > threshold) {
+                if (!devtoolsOpen) {
+                    devtoolsOpen = true;
+                    location.reload();
+                }
+            } else {
+                devtoolsOpen = false;
+            }
+        }, 500);
     </script>
 </body>
 </html>
-
