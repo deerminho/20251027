@@ -775,7 +775,7 @@
         </div>
 
         <div class="stats-section">
-            <div class="section-title">🎼 수록곡 목록 (총 16곡)</div>
+            <div class="section-title">🎼 수록곡 목록 (총 15곡)</div>
             <div class="grid-container" id="songGrid"></div>
         </div>
     </div>
@@ -831,16 +831,16 @@
 
             if (hour >= 6 && hour < 12) {
                 // 아침 (06:00-11:59): 45~95초
-                min = 45;
-                max = 85;
+                min = 65;
+                max = 95;
             } else if (hour >= 12 && hour < 18) {
                 // 점심 (12:00-17:59): 45~95초
-                min = 45;
-                max = 85;
+                min = 65;
+                max = 95;
             } else {
                 // 저녁 (18:00-05:59):45~95초
-                min = 45;
-                max = 85;
+                min = 65;
+                max = 100;
             }
 
             const range = max - min + 1;
@@ -984,6 +984,7 @@
     </script>
 </body>
 </html>
+
 
 
 
