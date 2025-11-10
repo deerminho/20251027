@@ -1,24 +1,373 @@
-// YouTube Player 초기화
-        window.onYouTubeIframeAPIReady = function() {
-            player = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                playerVars: {
-                    'listType': 'playlist',
-                    'list': PLAYLIST_ID,
-                    'autoplay': 1,
-                    'loop': 1,
-                    'rel': 0,
-                    'modestbranding': 1,
-                    'playsinline': 1,
-                    'enablejsapi': 1,
-                    'origin': window.location.origin,
-                    'widget_referrer': window.location.href
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange,
-                    'onError': onPlayerError
-                }
-            });
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>allnight with Jang Minho Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #2dd4bf;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .player-wrapper {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(45, 212, 191, 0.3);
+            margin-bottom: 20px;
+            background: #000;
+        }
+
+        .player-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(45, 212, 191, 0.4);
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+            user-select: none;
+            min-width: 140px;
+        }
+
+        button:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 10px rgba(45, 212, 191, 0.4);
+        }
+
+        button.unmute {
+            background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+            box-shadow: 0 4px 15px rgba(251, 113, 133, 0.4);
+        }
+
+        button.unmute:active {
+            box-shadow: 0 2px 10px rgba(251, 113, 133, 0.4);
+        }
+
+        .status {
+            text-align: center;
+            margin: 12px 0;
+            color: #0d9488;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #e0f2fe 0%, #ddd6fe 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #0d9488;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        /* 모바일 최적화 */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            button {
+                width: 100%;
+                padding: 16px 20px;
+                font-size: 15px;
+            }
+
+            .player-wrapper {
+                margin-bottom: 15px;
+            }
+
+            .status {
+                font-size: 13px;
+            }
+        }
+
+        /* 화면 회전 대응 */
+        @media (orientation: landscape) and (max-height: 500px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 1.3em;
+                margin-bottom: 10px;
+            }
+
+            .controls button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌙 allnight with Jang Minho</h1>
+        
+        <div class="status" id="status">Firebase 연결 중...</div>
+
+        <div class="player-wrapper">
+            <iframe id="player" 
+                    src=""
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen
+                    loading="eager">
+            </iframe>
+        </div>
+
+        <div class="controls">
+            <button onclick="unmutePlayer()" class="unmute">🔊 소리 켜기</button>
+            <button onclick="syncWithFirebase()">🔄 동기화</button>
+        </div>
+
+        <div class="info-box">
+            <strong>📱 모바일 재생 가이드</strong>
+            • 처음 로드 시 자동으로 음소거 상태로 재생됩니다<br>
+            • "소리 켜기" 버튼을 눌러 음악을 들으세요<br>
+            • 백그라운드 재생이 중단되면 화면을 다시 켜주세요<br>
+            • 모든 기기에서 동일한 재생목록이 동기화됩니다
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, onValue, get } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // Firebase 설정
+        const firebaseConfig = {
+            apiKey: "AIzaSyBDOcjC6DNtM-8xQS6PNZqV7yAFq4PMCR8",
+            authDomain: "always-88981.firebaseapp.com",
+            projectId: "always-88981",
+            storageBucket: "always-88981.firebasestorage.app",
+            messagingSenderId: "915000956041",
+            appId: "1:915000956041:web:490e0668c560aafd0e6258",
+            measurementId: "G-WRWS6GGV8L",
+            databaseURL: "https://always-88981-default-rtdb.firebaseio.com"
         };
+
+        // Firebase 초기화
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        let currentPlaylistId = 'PLfuYGpnnSBu24ryeO51pagt62smucmmGv';
+        let isMuted = true;
+        let isPlayerReady = false;
+
+        const statusElement = document.getElementById('status');
+
+        // 플레이어 초기화
+        function initializePlayer() {
+            statusElement.textContent = 'Firebase 연결됨 ✓';
+            statusElement.style.color = '#10b981';
+            updatePlayer(currentPlaylistId);
+            isPlayerReady = true;
+        }
+
+        // Firebase에서 재생목록 불러오기
+        const playlistRef = ref(database, 'overnight/playlist');
+        
+        // 실시간 리스너
+        onValue(playlistRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.id) {
+                currentPlaylistId = data.id;
+                if (isPlayerReady) {
+                    updatePlayer(currentPlaylistId);
+                }
+                console.log('Firebase에서 재생목록 로드:', currentPlaylistId);
+            }
+        });
+
+        // 플레이어 업데이트 함수 (모바일 최적화)
+        function updatePlayer(playlistId) {
+            const iframe = document.getElementById('player');
+            const muteParam = isMuted ? 1 : 0;
+            
+            // 모바일에서 끊김 없는 재생을 위한 파라미터
+            const playerUrl = `https://www.youtube.com/embed/videoseries?` +
+                `list=${playlistId}` +
+                `&autoplay=1` +
+                `&mute=${muteParam}` +
+                `&loop=1` +
+                `&rel=0` +
+                `&modestbranding=1` +
+                `&playsinline=1` +
+                `&enablejsapi=1` +
+                `&origin=${window.location.origin}`;
+            
+            iframe.src = playerUrl;
+        }
+
+        // 소리 켜기 함수 (모바일 친화적)
+        window.unmutePlayer = function() {
+            isMuted = false;
+            updatePlayer(currentPlaylistId);
+            
+            // 모바일에서 사용자 제스처 이후 재생 보장
+            const iframe = document.getElementById('player');
+            iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+            
+            statusElement.textContent = '🔊 소리가 켜졌습니다!';
+            statusElement.style.color = '#10b981';
+            
+            setTimeout(() => {
+                statusElement.textContent = 'Firebase 연결됨 ✓';
+            }, 3000);
+        };
+
+        // Firebase 동기화
+        window.syncWithFirebase = async function() {
+            statusElement.textContent = '동기화 중...';
+            statusElement.style.color = '#f59e0b';
+            
+            try {
+                const snapshot = await get(playlistRef);
+                if (snapshot.exists()) {
+                    const data = snapshot.val();
+                    const updateTime = data.updatedAt ? 
+                        new Date(data.updatedAt).toLocaleString('ko-KR') : '정보 없음';
+                    
+                    statusElement.textContent = '✅ 동기화 완료!';
+                    statusElement.style.color = '#10b981';
+                    
+                    setTimeout(() => {
+                        statusElement.textContent = 'Firebase 연결됨 ✓';
+                    }, 2000);
+                } else {
+                    await set(ref(database, 'overnight/playlist'), {
+                        id: currentPlaylistId,
+                        updatedAt: new Date().toISOString(),
+                        updatedBy: 'overnight_player'
+                    });
+                    statusElement.textContent = '초기 데이터 생성됨 ✓';
+                    statusElement.style.color = '#10b981';
+                }
+            } catch (error) {
+                console.error('동기화 오류:', error);
+                statusElement.textContent = '❌ 동기화 실패';
+                statusElement.style.color = '#ef4444';
+            }
+        };
+
+        // 페이지 가시성 변경 감지 (백그라운드 복귀 시 재생 유지)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && isPlayerReady) {
+                // 포그라운드로 돌아올 때 플레이어 상태 복원
+                console.log('페이지 활성화 - 플레이어 체크');
+            }
+        });
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('load', function() {
+            console.log('Overnight JangMinHo 플레이어 로드 완료 (모바일 최적화)');
+            
+            get(playlistRef).then((snapshot) => {
+                if (!snapshot.exists()) {
+                    set(ref(database, 'overnight/playlist'), {
+                        id: currentPlaylistId,
+                        updatedAt: new Date().toISOString(),
+                        updatedBy: 'overnight_player'
+                    });
+                }
+                initializePlayer();
+            }).catch((error) => {
+                console.error('초기화 오류:', error);
+                initializePlayer(); // 오류가 있어도 기본 플레이어는 로드
+            });
+        });
+
+        // 네트워크 재연결 시 자동 복구
+        window.addEventListener('online', function() {
+            console.log('네트워크 재연결됨');
+            if (isPlayerReady) {
+                syncWithFirebase();
+            }
+        });
+    </script>
+</body>
+</html>
